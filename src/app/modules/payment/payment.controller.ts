@@ -646,7 +646,32 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
   try {
     const appointment = await soloNurseAppoinment_Model.findById(
       req.body.appointmentId,
-    );
+    )
+      .populate({
+        path: "patientId",
+        populate: {
+          path: "userId",
+          model: "user",
+          select: "email fullName",
+        },
+      })
+      .populate({
+        path: "soloNurseId",
+        populate: {
+          path: "userId",
+          model: "user",
+          select: "email fullName",
+        },
+      });
+
+    const patientEmail = (appointment?.patientId as any)?.userId?.email;
+    const soloNurseEmail = (appointment?.soloNurseId as any)?.userId?.email;
+
+
+
+    // console.log("Patient Email:", patientEmail);
+    // console.log("Solo Nurse Email:", soloNurseEmail);
+
     if (!appointment)
       return res.status(404).json({ message: "Appointment not found" });
 
@@ -667,8 +692,418 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
     payment.bogOrderId = bogOrder.id;
     await payment.save();
 
+
+
+    const commissionAmount = (appointment.appointmentFee * 0.15).toFixed(2);
+    const nurseAmount = (appointment.appointmentFee * 0.85).toFixed(2);
+
+    // giorgi's email 
+    const accountingEmail = "accounting@medconnect.com.ge";
+
+    const nurseReceiptHtml = `
+  <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
+
+    <h1 style="color: #0f766e; margin-bottom: 5px;">
+      MedConnect
+    </h1>
+
+    <p style="margin: 3px 0;">
+      <strong>კომპანიის დასახელება:</strong>
+      შპს მედქონექთ ჯგუფი 2025
+    </p>
+
+    <p style="margin: 3px 0;">
+      <strong>საიდენტიფიკაციო კოდი:</strong>
+      430049501
+    </p>
+
+    <p style="margin: 3px 0;">
+      <strong>მისამართი:</strong>
+      საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h2 style="margin-bottom: 15px;">
+      საკომისიო ინვოისი
+    </h2>
+
+    <p>
+      <strong>ინვოისის ნომერი:</strong>
+      COMM-${payment._id}
+    </p>
+
+    <p>
+      <strong>გაცემის თარიღი:</strong>
+      ${new Date().toLocaleDateString()}
+    </p>
+
+    <p>
+      <strong>შეკვეთის ID:</strong>
+      ${payment._id}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>მიმღები</h3>
+
+    <p>
+      <strong>სახელი და გვარი:</strong>
+      ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
+    </p>
+
+    <p>
+      <strong>სტატუსი:</strong>
+      ინდმეწარმე / მცირე მეწარმე
+    </p>
+
+    <p>
+      <strong>საიდენტიფიკაციო ნომერი:</strong>
+      ${(appointment.soloNurseId as any)?._id || "N/A"}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>მომსახურების აღწერა</h3>
+
+    <p>
+      MedConnect პლატფორმის საკომისიო მომსახურება
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>ფინანსური ინფორმაცია</h3>
+
+    <p>
+      <strong>მომსახურების სრული ღირებულება:</strong>
+      ${appointment.appointmentFee} ₾
+    </p>
+
+    <p>
+      <strong>საკომისიო (15%):</strong>
+      ${commissionAmount} ₾
+    </p>
+
+    <p style="font-size: 18px;">
+      <strong>სულ:</strong>
+      ${commissionAmount} ₾
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>ექთანზე ჩასარიცხი თანხა</h3>
+
+    <p style="font-size: 18px;">
+      <strong>${nurseAmount} ₾</strong>
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>გადახდის თარიღი</h3>
+
+    <p>
+      ${new Date().toLocaleDateString()}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>შენიშვნა</h3>
+
+    <p style="line-height: 1.7;">
+      აღნიშნული ინვოისი ასახავს MedConnect-ის საკომისიოს მოცემულ შეკვეთაზე.
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>საკონტაქტო</h3>
+
+    <p>
+      main@medconnect.com.ge
+    </p>
+
+  </div>
+  `;
+    const patientReceit1 = `
+  <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
+
+    <h1 style="color: #0f766e; margin-bottom: 5px;">
+      MedConnect
+    </h1>
+
+    <p style="margin: 3px 0;">
+      <strong>კომპანიის დასახელება:</strong>
+      შპს მედქონექთ ჯგუფი 2025
+    </p>
+
+    <p style="margin: 3px 0;">
+      <strong>საიდენტიფიკაციო კოდი:</strong>
+      430049501
+    </p>
+
+    <p style="margin: 3px 0;">
+      <strong>მისამართი:</strong>
+      საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h2 style="margin-bottom: 15px;">
+      მომსახურების ქვითარი
+    </h2>
+
+    <p>
+      <strong>დოკუმენტის ნომერი:</strong>
+      NUR-${payment._id}
+    </p>
+
+    <p>
+      <strong>გაცემის თარიღი:</strong>
+      ${new Date().toLocaleDateString()}
+    </p>
+
+    <p>
+      <strong>შეკვეთის ID:</strong>
+      ${payment._id}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>მომსახურების გამწევი</h3>
+
+    <p>
+      <strong>სახელი და გვარი:</strong>
+      ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
+    </p>
+
+    <p>
+      <strong>სტატუსი:</strong>
+      ინდმეწარმე / მცირე მეწარმე
+    </p>
+
+    <p>
+      <strong>საიდენტიფიკაციო ნომერი:</strong>
+      ${(appointment.soloNurseId as any)?._id || "N/A"}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>პაციენტი</h3>
+
+    <p>
+      <strong>სახელი და გვარი:</strong>
+      ${(appointment.patientId as any)?.userId?.fullName || "N/A"}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>მომსახურების დეტალები</h3>
+
+    <p>
+      <strong>მომსახურება:</strong>
+      ${appointment.subService}
+    </p>
+
+    <p>
+      <strong>თარიღი:</strong>
+      ${appointment.prefarenceDate?.[0]
+        ? new Date(appointment.prefarenceDate[0] as any).toLocaleDateString()
+        : "N/A"
+      }
+      ${appointment.prefarenceTime || ""}
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>ფინანსური ინფორმაცია</h3>
+
+    <p>
+      <strong>მომსახურების ღირებულება:</strong>
+      ${appointment.appointmentFee} ₾
+    </p>
+
+    <p>
+      <strong>რაოდენობა:</strong>
+      1
+    </p>
+
+    <p style="font-size: 18px;">
+      <strong>ჯამი:</strong>
+      ${appointment.appointmentFee} ₾
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>გადახდის მეთოდი</h3>
+
+    <p>
+      ბარათით გადახდა
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>შენიშვნა</h3>
+
+    <p style="line-height: 1.7;">
+      აღნიშნული ქვითარი გაცემულია ექთნის მიერ გაწეული მომსახურებისთვის.
+      MedConnect წარმოადგენს აგენტ პლატფორმას, რომელიც უზრუნველყოფს დაჯავშნას და
+      გადახდას.
+    </p>
+
+    <hr style="margin: 25px 0;" />
+
+    <h3>საკონტაქტო</h3>
+
+    <p>
+      თუ გაქვთ შეკითხვა ამ ქვითართან დაკავშირებით, დაგვიკავშირდით:
+    </p>
+
+    <p>
+      main@medconnect.com.ge
+    </p>
+
+  </div>
+  `;
+    const patientReceit2 = `
+    <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+      
+      <h1 style="color: #0f766e; margin-bottom: 5px;">MedConnect</h1>
+
+      <p style="margin: 2px 0;">
+        <strong>კომპანიის დასახელება:</strong> შპს მედქონექთ ჯგუფი 2025
+      </p>
+
+      <p style="margin: 2px 0;">
+        <strong>საიდენტიფიკაციო კოდი:</strong> 430049501
+      </p>
+
+      <p style="margin: 2px 0;">
+        <strong>მისამართი:</strong> საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h2 style="margin-bottom: 10px;">ქვითარი</h2>
+
+      <p>
+        <strong>დოკუმენტის ნომერი:</strong> MC-${payment._id}
+      </p>
+
+      <p>
+        <strong>გაცემის თარიღი:</strong> ${new Date().toLocaleDateString()}
+      </p>
+
+      <p>
+        <strong>შეკვეთის ID:</strong> ${payment._id}
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>მომხმარებელი</h3>
+
+      <p>
+        <strong>სახელი და გვარი:</strong> ${(appointment.patientId as any)?.userId?.fullName || "N/A"
+      }
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>მომსახურების აღწერა</h3>
+
+      <p>
+        MedConnect პლატფორმის სერვისის საფასური
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>ფინანსური ინფორმაცია</h3>
+
+      <p>
+        <strong>სერვისის საფასური:</strong>
+        ${appointment.appointmentFee} ₾
+      </p>
+
+      <p>
+        <strong>მათ შორის დღგ (18%):</strong>
+        ${(appointment.appointmentFee * 0.18).toFixed(2)} ₾
+      </p>
+
+      <p style="font-size: 18px;">
+        <strong>ჯამი:</strong>
+        ${appointment.appointmentFee} ₾
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>გადახდის მეთოდი</h3>
+
+      <p>ბარათით გადახდა</p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>შენიშვნა</h3>
+
+      <p>
+        აღნიშნული თანხა წარმოადგენს MedConnect პლატფორმის გამოყენების საფასურს.
+      </p>
+
+      <hr style="margin: 20px 0;" />
+
+      <h3>საკონტაქტო</h3>
+
+      <p>
+        main@medconnect.com.ge
+      </p>
+
+    </div>
+  `;
+
+    if (bogOrder) {
+      //send to patients 
+      await sendEmail({
+        to: patientEmail,
+        subject: "MedConnect Nurse Service Receipt",
+        html: patientReceit1,
+      });
+      await sendEmail({
+        to: patientEmail,
+        subject: "MedConnect Payment Receipt",
+        html: patientReceit2,
+      });
+
+      // send to nurse
+      await sendEmail({
+        to: soloNurseEmail,
+        subject: "MedConnect Commission Invoice",
+        html: nurseReceiptHtml,
+      });
+
+
+
+      // send to giorgi accounting
+      await sendEmail({
+        to: accountingEmail,
+        subject: `MedConnect Nurse Service Receipt`,
+        html: patientReceit1,
+      });
+
+      await sendEmail({
+        to: accountingEmail,
+        subject: `MedConnect Payment Receipt`,
+        html: patientReceit2,
+      });
+
+      await sendEmail({
+        to: accountingEmail,
+        subject: `Nurse Service Receipt `,
+        html: nurseReceiptHtml,
+      });
+
+    }
+
+
     res.json({ redirectUrl: bogOrder._links.redirect.href });
   } catch (error: any) {
+    console.error("Error creating BoG order:", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };

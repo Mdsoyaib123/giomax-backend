@@ -46,95 +46,96 @@ type PaymentMethod = "card" | "google_pay" | "apple_pay";
 const createBoGOrder = async (
   payment: any,
   method: PaymentMethod = "card",
-  payToken?: string,
+  payToken?: string
 ) => {
-  const Banktoken = await getAccessToken();
+  try {
+    if (!payment?._id) throw new Error("Payment ID is missing");
+    if (!payment?.amount) throw new Error("Payment amount is missing");
+    if (!payment?.appointmentId) throw new Error("Appointment ID is missing");
+    if (!process.env.BACKEND_URL) throw new Error("BACKEND_URL is missing");
 
-  console.log('token from BoG:', Banktoken);
-  console.log('pay token:', payToken);
-  console.log('method:', method);
+    const Banktoken = await getAccessToken();
 
-  const body: any = {
-    callback_url: `${process.env.BACKEND_URL}/api/v1/payment/bog/callback`,
-    external_order_id: payment._id.toString(),
-    purchase_units: {
-      currency: "GEL",
-      total_amount: payment.amount.toFixed(2),
-      basket: [
-        {
-          quantity: 1,
-          unit_price: payment.amount.toFixed(2),
-          product_id: payment.appointmentId.toString(),
-        },
-      ],
-    },
-  };
+    const body: any = {
+      callback_url: `${process.env.BACKEND_URL}/api/v1/payment/bog/callback`,
+      external_order_id: payment._id.toString(),
 
-  // ✅ CARD (existing behavior)
-  if (method === "card") {
-    body.redirect_urls = {
-      success: `${process.env.BACKEND_URL}/api/v1/payment/success?paymentId=${payment._id}`,
-      fail: `${process.env.BACKEND_URL}/api/v1/payment/fail?paymentId=${payment._id}`,
+      purchase_units: {
+        currency: "GEL",
+        total_amount: Number(payment.amount).toFixed(2),
+        basket: [
+          {
+            quantity: 1,
+            unit_price: Number(payment.amount).toFixed(2),
+            product_id: payment.appointmentId.toString(),
+          },
+        ],
+      },
     };
 
-    body.payment_method = ["card"];
-  }
+    if (method === "card") {
+      body.redirect_urls = {
+        success: `${process.env.BACKEND_URL}/api/v1/payment/success?paymentId=${payment._id}`,
+        fail: `${process.env.BACKEND_URL}/api/v1/payment/fail?paymentId=${payment._id}`,
+      };
 
-  // ✅ GOOGLE PAY
-  if (method === "google_pay") {
-    if (!payToken) {
-      throw new Error("Google Pay token is required");
+      body.payment_method = ["card"];
     }
 
-    body.payment_method = ["google_pay"];
-    body.config = {
-      google_pay: {
-        external: true,
-        google_pay_token: payToken,
-      },
-    };
+    if (method === "google_pay") {
+      if (!payToken) {
+        throw new Error("Google Pay token is required");
+      }
+
+      body.payment_method = ["google_pay"];
+      body.config = {
+        google_pay: {
+          external: true,
+          google_pay_token: payToken,
+        },
+      };
+    }
+
+    if (method === "apple_pay") {
+      body.payment_method = ["apple_pay"];
+      body.config = {
+        apple_pay: {
+          external: true,
+        },
+      };
+    }
+
+    const res = await axios.post(
+      "https://api.bog.ge/payments/v1/ecommerce/orders",
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${Banktoken}`,
+          "Content-Type": "application/json",
+          "Accept-Language": "en",
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error("BoG order create failed:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      throw new Error(
+        error.response?.data?.message ||
+        error.response?.data?.error_description ||
+        "Failed to create Bank of Georgia payment order"
+      );
+    }
+
+    console.error("Payment order error:", error.message);
+    throw error;
   }
-
-  // ✅ APPLE PAY
-  // if (method === "apple_pay") {
-  //   if (!payToken) {
-  //     throw new Error("Apple Pay token is required");
-  //   }
-
-  //   body.payment_method = ["apple_pay"];
-  //   body.config = {
-  //     apple_pay: {
-  //       external: true,
-  //       apple_pay_token: payToken,
-  //     },
-  //   };
-  // }
-
-  if (method === "apple_pay") {
-  body.payment_method = ["apple_pay"];
-
-  body.config = {
-    apple_pay: {
-      external: true,
-    },
-  };
-}
-
-  const res = await axios.post(
-    "https://api.bog.ge/payments/v1/ecommerce/orders",
-    body,
-    {
-      headers: {
-        Authorization: `Bearer ${Banktoken}`,
-        "Content-Type": "application/json",
-        "Accept-Language": "en",
-      },
-    },
-  );
-
-  console.log('response from BoG:', res.data);
-
-  return res.data;
 };
 
 const handleBoGCallbackService = async (payload: any) => {
