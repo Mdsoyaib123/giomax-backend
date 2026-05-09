@@ -193,6 +193,9 @@ export const createDefaultSuperAdmin = async () => {
         password: hashedPassword,
         comfirmPassword: hashedPassword,
         role: "admin",
+        isVerified : true,
+        isAdminVerified : true,
+        isMobileVerified : true,
       });
       console.log("✅ Default Admin created.");
     } else {

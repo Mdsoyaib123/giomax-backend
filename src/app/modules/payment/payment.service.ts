@@ -50,6 +50,10 @@ const createBoGOrder = async (
 ) => {
   const Banktoken = await getAccessToken();
 
+  console.log('token from BoG:', Banktoken);
+  console.log('pay token:', payToken);
+  console.log('method:', method);
+
   const body: any = {
     callback_url: `${process.env.BACKEND_URL}/api/v1/payment/bog/callback`,
     external_order_id: payment._id.toString(),
@@ -92,19 +96,29 @@ const createBoGOrder = async (
   }
 
   // ✅ APPLE PAY
-  if (method === "apple_pay") {
-    if (!payToken) {
-      throw new Error("Apple Pay token is required");
-    }
+  // if (method === "apple_pay") {
+  //   if (!payToken) {
+  //     throw new Error("Apple Pay token is required");
+  //   }
 
-    body.payment_method = ["apple_pay"];
-    body.config = {
-      apple_pay: {
-        external: true,
-        apple_pay_token: payToken,
-      },
-    };
-  }
+  //   body.payment_method = ["apple_pay"];
+  //   body.config = {
+  //     apple_pay: {
+  //       external: true,
+  //       apple_pay_token: payToken,
+  //     },
+  //   };
+  // }
+
+  if (method === "apple_pay") {
+  body.payment_method = ["apple_pay"];
+
+  body.config = {
+    apple_pay: {
+      external: true,
+    },
+  };
+}
 
   const res = await axios.post(
     "https://api.bog.ge/payments/v1/ecommerce/orders",

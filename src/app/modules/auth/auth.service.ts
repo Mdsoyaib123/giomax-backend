@@ -20,6 +20,11 @@ const login_user_from_db = async (
     email: payload?.email,
   });
 
+
+  if (!isExistAccount) {
+    throw new AppError("Account not found", httpStatus.NOT_FOUND);
+  }
+
   if (isExistAccount) {
     await User_Model.findOneAndUpdate(
       { email: payload?.email },
@@ -27,6 +32,8 @@ const login_user_from_db = async (
       { new: true },
     );
   }
+
+
 
   if (
     isExistAccount.isVerified === false &&

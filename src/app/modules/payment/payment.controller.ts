@@ -24,7 +24,7 @@ const startClinicPayment = async (req: Request, res: Response) => {
       dataVisibility,
       method,
       token,
-      
+
     } = req.body;
 
     const visibleChecked = dataVisibility === "ხილული" ? "☑" : "☐";
