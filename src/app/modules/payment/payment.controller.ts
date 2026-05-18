@@ -697,8 +697,8 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
 
 
-    const commissionAmount = (appointment.appointmentFee * 0.15).toFixed(2);
-    const nurseAmount = (appointment.appointmentFee * 0.85).toFixed(2);
+    const commissionAmount = (appointment.appointmentFee * 0.20).toFixed(2);
+    const nurseAmount = (appointment.appointmentFee * 0.80).toFixed(2);
 
     // giorgi's email 
     const accountingEmail = "accounting@medconnect.com.ge";
