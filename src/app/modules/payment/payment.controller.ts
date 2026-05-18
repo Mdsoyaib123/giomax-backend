@@ -1026,8 +1026,8 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
       </p>
 
       <p>
-        <strong>მათ შორის დღგ (18%):</strong>
-        ${(appointment.appointmentFee * 0.18).toFixed(2)} ₾
+        <strong>მათ შორის დღგ (05%):</strong>
+        ${(appointment.appointmentFee * 0.05).toFixed(2)} ₾
       </p>
 
       <p style="font-size: 18px;">
