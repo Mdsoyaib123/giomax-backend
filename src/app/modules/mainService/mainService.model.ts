@@ -8,7 +8,7 @@ const mainServiceSchema = new Schema(
         "General nurse care",
         "Physio therapy",
         "Pregnancy care",
-        "Other",
+        "Mental Health",
       ],
       required: true,
     },

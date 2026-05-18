@@ -7,6 +7,7 @@ import { sendEmail } from "../../utils/sendEmail";
 import { Patient_Model } from "../patient/patient.model";
 import { Clinic_Model } from "../clinic/clinic.model";
 import { sendEmailWithSES } from "../../utils/sendEmailWithSES";
+import { sendBoGPaymentResponse } from "../../utils/sendBoGPaymentResponse";
 
 // Start payment for clinic appointment
 const startClinicPayment = async (req: Request, res: Response) => {
@@ -61,6 +62,8 @@ const startClinicPayment = async (req: Request, res: Response) => {
     );
     payment.bogOrderId = bogOrder.id;
     await payment.save();
+
+
 
     //     await sendEmailWithSES({
     //       to: patientEmail,
@@ -1101,7 +1104,9 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
     }
 
 
-    res.json({ redirectUrl: bogOrder._links.redirect.href });
+    // res.json({ redirectUrl: bogOrder._links.redirect.href });
+    return sendBoGPaymentResponse(res, bogOrder);
+    
   } catch (error: any) {
     console.error("Error creating BoG order:", error.message);
     res.status(500).json({ success: false, message: error.message });
