@@ -71,7 +71,13 @@ const createBoGOrder = async (
           },
         ],
       },
+
+      redirect_urls: {
+        success: `${process.env.BACKEND_URL}/api/v1/payment/success?paymentId=${payment._id}`,
+        fail: `${process.env.BACKEND_URL}/api/v1/payment/fail?paymentId=${payment._id}`,
+      },
     };
+
 
     if (method === "card") {
       body.redirect_urls = {
@@ -117,6 +123,8 @@ const createBoGOrder = async (
       }
     );
 
+    console.log("BoG order created successfully:", res.data);
+
     return res.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -141,27 +149,65 @@ const createBoGOrder = async (
 const handleBoGCallbackService = async (payload: any) => {
   const external_order_id = payload?.body?.external_order_id;
   const status = payload?.body?.order_status?.key;
+  
+  const rejectReason =
+    payload?.body?.reject_reason ||
+    payload?.body?.payment_detail?.code_description;
+
+  console.log("BoG callback received:", {
+    external_order_id,
+    status,
+    rejectReason,
+  });
 
   const payment = await Payment_Model.findById(external_order_id);
-  if (!payment) throw new Error("Payment not found");
 
-  if (payment.status === "PAID") return { message: "Already processed" };
-
-  if (status === "completed") {
-    payment.status = "PAID";
-    await Wallet_Model.findOneAndUpdate(
-      { ownerId: payment.receiverId, ownerType: payment.receiverType },
-      { $inc: { pendingBalance: payment.amount } },
-      { upsert: true, new: true },
-    );
-  } else {
-    payment.status = "FAILED";
+  if (!payment) {
+    throw new Error("Payment not found");
   }
 
-  await payment.save();
-  return { message: "Callback processed successfully" };
-};
+  if (payment.status === "PAID") {
+    return {
+      success: true,
+      message: "Already processed",
+    };
+  }
 
+  if (status === "completed" || status === "approved") {
+    payment.status = "PAID";
+
+    await Wallet_Model.findOneAndUpdate(
+      {
+        ownerId: payment.receiverId,
+        ownerType: payment.receiverType,
+      },
+      {
+        $inc: { pendingBalance: payment.amount },
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+
+    await payment.save();
+
+    return {
+      success: true,
+      message: "Payment completed successfully",
+    };
+  }
+
+  // ❌ FAILED PAYMENT
+  payment.status = "FAILED";
+
+  await payment.save();
+
+  return {
+    success: false,
+    message: rejectReason || "Payment failed",
+  };
+};
 const getPaymentIdForRefund = async (
   appointmentId: string,
   appointmentType: "CLINIC" | "SOLO_NURSE",
