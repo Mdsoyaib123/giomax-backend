@@ -199,7 +199,7 @@ export const createPatient = async (
 };
 
 const createSoloNurse = async (payload: any) => {
-  console.log("solo nurse datra ", payload);
+  // console.log("solo nurse datra ", payload);
   const session = await mongoose.startSession();
   session.startTransaction();
 

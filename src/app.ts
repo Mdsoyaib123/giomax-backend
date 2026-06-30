@@ -23,6 +23,7 @@ app.use(
       "https://medconnect.com.ge",
       "https://admin.medconnect.com.ge",
       "https://www.medconnect.com.ge",
+      "https://famous-brigadeiros-c58211.netlify.app",
       "*"
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
