@@ -696,9 +696,11 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
     await payment.save();
 
 
+    const roundMoney = (value: number) =>
+      Math.round((value + Number.EPSILON) * 100) / 100;
 
-    const commissionAmount = (appointment.appointmentFee * 0.20).toFixed(2);
-    const nurseAmount = (appointment.appointmentFee * 0.80).toFixed(2);
+    const commissionAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.15);
+    const nurseAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.85);
 
     // giorgi's email 
     const accountingEmail = "accounting@medconnect.com.ge";
@@ -762,7 +764,7 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     <p>
       <strong>საიდენტიფიკაციო ნომერი:</strong>
-      ${(appointment.soloNurseId as any)?._id || "N/A"}
+      ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
     </p>
 
     <hr style="margin: 25px 0;" />
@@ -779,13 +781,19 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     <p>
       <strong>მომსახურების სრული ღირებულება:</strong>
-      ${appointment.appointmentFee} ₾
+      ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
     </p>
 
     <p>
       <strong>საკომისიო (15%):</strong>
       ${commissionAmount} ₾
     </p>
+    <p>
+      <strong>მათ შორის დღგ (18%):</strong>
+      ${roundMoney(commissionAmount * 0.18)} ₾
+    </p>
+
+    
 
     <p style="font-size: 18px;">
       <strong>სულ:</strong>
@@ -885,7 +893,7 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     <p>
       <strong>საიდენტიფიკაციო ნომერი:</strong>
-      ${(appointment.soloNurseId as any)?._id || "N/A"}
+      ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
     </p>
 
     <hr style="margin: 25px 0;" />
@@ -921,7 +929,7 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     <p>
       <strong>მომსახურების ღირებულება:</strong>
-      ${appointment.appointmentFee} ₾
+      ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
     </p>
 
     <p>
@@ -931,7 +939,7 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     <p style="font-size: 18px;">
       <strong>ჯამი:</strong>
-      ${appointment.appointmentFee} ₾
+      ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
     </p>
 
     <hr style="margin: 25px 0;" />
@@ -1022,17 +1030,17 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
       <p>
         <strong>სერვისის საფასური:</strong>
-        ${appointment.appointmentFee} ₾
+        ${roundMoney(appointment.appointmentFee * 0.05)} ₾
       </p>
 
       <p>
-        <strong>მათ შორის დღგ (05%):</strong>
-        ${(appointment.appointmentFee * 0.05).toFixed(2)} ₾
+        <strong>მათ შორის დღგ (18%):</strong>
+        ${roundMoney(((appointment.appointmentFee * 0.05) * .18))} ₾
       </p>
 
       <p style="font-size: 18px;">
         <strong>ჯამი:</strong>
-        ${appointment.appointmentFee} ₾
+        ${roundMoney(appointment.appointmentFee * 0.05)} ₾
       </p>
 
       <hr style="margin: 20px 0;" />
@@ -1106,7 +1114,7 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     // res.json({ redirectUrl: bogOrder._links.redirect.href });
     return sendBoGPaymentResponse(res, bogOrder);
-    
+
   } catch (error: any) {
     console.error("Error creating BoG order:", error.message);
     res.status(500).json({ success: false, message: error.message });
