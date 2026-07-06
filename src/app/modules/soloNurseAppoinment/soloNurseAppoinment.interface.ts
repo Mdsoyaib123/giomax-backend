@@ -14,4 +14,5 @@ export type TSoloNurseAppoinment = {
   appointmentFee: number;
   isRefunded: 'refund-requested' |'refunded' | 'no-refund' | 'refund-rejected';
   completedAt?: Date;
+  isPaymentDone : "PAID" | "FAILED" | "PENDING";
 };

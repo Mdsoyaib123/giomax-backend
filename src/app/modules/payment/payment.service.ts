@@ -2,6 +2,7 @@ import axios from "axios";
 import { getAccessToken } from "../../utils/BankAccessToken";
 import { Payment_Model } from "./payment.model";
 import { Wallet_Model } from "../wallet/wallet.model";
+import { soloNurseAppoinment_Model } from "../soloNurseAppoinment/soloNurseAppoinment.model";
 
 // const createBoGOrder = async (payment: any) => {
 //   const token = await getAccessToken();
@@ -149,7 +150,7 @@ const createBoGOrder = async (
 const handleBoGCallbackService = async (payload: any) => {
   const external_order_id = payload?.body?.external_order_id;
   const status = payload?.body?.order_status?.key;
-  
+
   const rejectReason =
     payload?.body?.reject_reason ||
     payload?.body?.payment_detail?.code_description;
@@ -172,6 +173,8 @@ const handleBoGCallbackService = async (payload: any) => {
       message: "Already processed",
     };
   }
+
+
 
   if (status === "completed" || status === "approved") {
     payment.status = "PAID";
@@ -196,7 +199,19 @@ const handleBoGCallbackService = async (payload: any) => {
       success: true,
       message: "Payment completed successfully",
     };
+  } else if (payment.appointmentType === "SOLO_NURSE") {
+    const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    appointment.isPaymentDone = "FAILED";
+    await appointment.save();
   }
+
+
+
 
   // ❌ FAILED PAYMENT
   payment.status = "FAILED";
