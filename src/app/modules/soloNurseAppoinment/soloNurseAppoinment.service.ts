@@ -590,7 +590,7 @@ export const soloNurseAppointmentService = {
       {
         $match: {
           status: "completed",
-          completedAt: { $gte: lastSunday, $lte: lastWeekEnd }, // full last week
+          // completedAt: { $gte: lastSunday, $lte: lastWeekEnd }, // full last week
         },
       },
       {
@@ -623,9 +623,18 @@ export const soloNurseAppointmentService = {
           _id: 0,
           soloNurseId: "$soloNurse._id",
           name: "$user.fullName",
+          nationalIdNumber: "$soloNurse.nationalIdNumber",
+          nurseBadge: "$soloNurse.adminAssignProfileImageBadge",
           IBAN_number:
             "$soloNurse.paymentAndEarnings.withdrawalMethods.IBanNumber",
-          totalAmount: { $multiply: ["$totalAmount", 0.85] },
+          totalAmount: {
+            $round: [
+              {
+                $multiply: ["$totalAmount", 0.95, 0.85],
+              },
+              2,
+            ],
+          },
           completedAppointments: 1,
         },
       },

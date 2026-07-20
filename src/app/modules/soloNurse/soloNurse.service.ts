@@ -575,9 +575,19 @@ export const SoloNurseService = {
       ownerType: "SOLO_NURSE",
     });
 
+    const roundMoney = (value: number) =>
+      Math.round((value + Number.EPSILON) * 100) / 100;
+
     const soloNurseWithdrawAbleMoney = soloNurseMoney?.withdrawAbleBalance || 0;
-    const commission = soloNurseWithdrawAbleMoney * 0.15;
-    const nurseReceives = soloNurseWithdrawAbleMoney - commission;
+    const platformFee = soloNurseWithdrawAbleMoney * 0.05;
+    const remainingAmount = soloNurseWithdrawAbleMoney - platformFee;
+
+    const commission = remainingAmount * 0.15;
+    const nurseReceives = roundMoney(remainingAmount - commission);
+
+
+
+
 
     const soloNurseWithdrawRequests = await WithdrawRequest_Model.find({
       ownerId: soloNurseId,
