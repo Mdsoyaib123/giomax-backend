@@ -5,6 +5,7 @@ import { Wallet_Model } from "../wallet/wallet.model";
 import { WithdrawRequest_Model } from "../withdrowRequest/withdrowRequest.model";
 import { soloNurseAppoinment_Model } from "../soloNurseAppoinment/soloNurseAppoinment.model";
 
+
 export const SoloNurseService = {
   // getAllSoloNurses: async (serviceName?: string, sub_serviceName?: string , patientUserId?: string) => {
 
@@ -640,9 +641,16 @@ export const SoloNurseService = {
 
     console.log("totalEarnings", totalEarnings);
 
+    const roundMoney = (value: number) =>
+      Math.round((value + Number.EPSILON) * 100) / 100;
+
     const soloNurseWithdrawAbleMoney = totalEarnings?.withdrawAbleBalance || 0;
-    const commission = soloNurseWithdrawAbleMoney * 0.15;
-    const nurseReceives = soloNurseWithdrawAbleMoney - commission;
+
+    const platformFee = soloNurseWithdrawAbleMoney * 0.05;
+    const remainingAmount = soloNurseWithdrawAbleMoney - platformFee;
+
+    const commission = remainingAmount * 0.15;
+    const nurseReceives = roundMoney(remainingAmount - commission);
 
     return {
       allAppoinment: allAppointments.length,

@@ -9,7 +9,10 @@ import bcrypt from "bcrypt";
 import { configs } from "./app/configs";
 import axios from "axios";
 import { getAccessToken } from "./app/utils/BankAccessToken";
+import cron from "node-cron";
+import { soloNurseAppoinment_Model } from "./app/modules/soloNurseAppoinment/soloNurseAppoinment.model";
 const bodyParser = require("body-parser");
+
 
 const app = express();
 
@@ -166,6 +169,23 @@ app.post("/payment/callback", (req, res) => {
 
 // ------------------------- End of BoG Payment Integration ------------------ //
 
+
+
+// Runs every 10 seconds
+cron.schedule("*/10 * * * * *", async () => {
+  try {
+    // console.log("Running every 10 seconds...");
+
+    await soloNurseAppoinment_Model.deleteMany({
+      isPaymentDone: "FAILED",
+    });
+
+  } catch (error) {
+    console.error("❌ Cron job failed:", error);
+  }
+});
+
+
 // Root route
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
@@ -173,6 +193,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "Server is running successfully!",
   });
 });
+
 
 // Create Default Admin
 export const createDefaultSuperAdmin = async () => {
@@ -193,9 +214,9 @@ export const createDefaultSuperAdmin = async () => {
         password: hashedPassword,
         comfirmPassword: hashedPassword,
         role: "admin",
-        isVerified : true,
-        isAdminVerified : true,
-        isMobileVerified : true,
+        isVerified: true,
+        isAdminVerified: true,
+        isMobileVerified: true,
       });
       console.log("✅ Default Admin created.");
     } else {

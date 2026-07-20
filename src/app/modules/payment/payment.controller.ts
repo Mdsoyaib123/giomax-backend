@@ -671,10 +671,6 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
     const soloNurseEmail = (appointment?.soloNurseId as any)?.userId?.email;
 
 
-
-    // console.log("Patient Email:", patientEmail);
-    // console.log("Solo Nurse Email:", soloNurseEmail);
-
     if (!appointment)
       return res.status(404).json({ message: "Appointment not found" });
 

@@ -128,6 +128,18 @@ const createBoGOrder = async (
 
     return res.data;
   } catch (error: any) {
+
+    if (payment.appointmentType === "SOLO_NURSE") {
+      const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+      if (!appointment) {
+        throw new Error("Appointment not found");
+      }
+      appointment.isPaymentDone = "FAILED";
+      await appointment.save();
+
+    }
+
+
     if (axios.isAxiosError(error)) {
       console.error("BoG order create failed:", {
         status: error.response?.status,
@@ -194,6 +206,16 @@ const handleBoGCallbackService = async (payload: any) => {
     );
 
     await payment.save();
+
+    if (payment.appointmentType === "SOLO_NURSE") {
+      const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+      if (!appointment) {
+        throw new Error("Appointment not found");
+      }
+      appointment.isPaymentDone = "PAID";
+      await appointment.save();
+
+    }
 
     return {
       success: true,
