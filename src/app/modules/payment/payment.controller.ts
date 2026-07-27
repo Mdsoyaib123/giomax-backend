@@ -1129,34 +1129,264 @@ const bogCallbackController = async (req: Request, res: Response) => {
 };
 
 // Payment success page
+// const paymentSuccess = async (req: Request, res: Response) => {
+//   const { paymentId } = req.query;
+//   if (!paymentId) return res.status(400).send("Invalid payment request");
+
+//   const payment = await Payment_Model.findById(paymentId as string);
+//   if (!payment) return res.status(404).send("Payment not found");
+
+//   res.send(`
+//     <h2>✅ Payment Successful</h2>
+//     <p>Your payment is being processed.</p>
+//     <p>Reference ID: ${paymentId}</p>
+//   `);
+// };
+
 const paymentSuccess = async (req: Request, res: Response) => {
   const { paymentId } = req.query;
-  if (!paymentId) return res.status(400).send("Invalid payment request");
+
+  if (!paymentId) {
+    return res.status(400).send("Invalid payment request");
+  }
 
   const payment = await Payment_Model.findById(paymentId as string);
-  if (!payment) return res.status(404).send("Payment not found");
+
+  if (!payment) {
+    return res.status(404).send("Payment not found");
+  }
+
+  // Change this to your frontend dashboard URL
+  const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";
 
   res.send(`
-    <h2>✅ Payment Successful</h2>
-    <p>Your payment is being processed.</p>
-    <p>Reference ID: ${paymentId}</p>
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Payment Successful</title>
+
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+
+          body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f7fb;
+          }
+
+          .card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+          }
+
+          .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+          }
+
+          h2 {
+            color: #16a34a;
+            margin-bottom: 12px;
+          }
+
+          p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+          }
+
+          .reference {
+            font-weight: bold;
+            color: #111827;
+            margin: 20px 0;
+            word-break: break-all;
+          }
+
+          .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+          }
+
+          .btn:hover {
+            background: #1d4ed8;
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="card">
+          <div class="icon">✅</div>
+
+          <h2>Payment Successful</h2>
+
+          <p>Your payment has been received successfully.</p>
+          <p>We're processing your transaction.</p>
+
+          <p class="reference">
+            Reference ID:<br />
+            ${paymentId}
+          </p>
+
+          <a href="${dashboardUrl}" class="btn">
+            Back to Dashboard
+          </a>
+        </div>
+      </body>
+    </html>
   `);
 };
+
 
 // Payment failed page
+// const paymentFail = async (req: Request, res: Response) => {
+//   const { paymentId } = req.query;
+//   if (!paymentId) return res.status(400).send("Invalid payment request");
+
+//   const payment = await Payment_Model.findById(paymentId as string);
+//   if (!payment) return res.status(404).send("Payment not found");
+
+//   res.send(`
+//     <h2>❌ Payment Failed</h2>
+//     <p>Your payment was not completed.</p>
+//     <p>Reference ID: ${paymentId}</p>
+//   `);
+// };
+
 const paymentFail = async (req: Request, res: Response) => {
   const { paymentId } = req.query;
-  if (!paymentId) return res.status(400).send("Invalid payment request");
+
+  if (!paymentId) {
+    return res.status(400).send("Invalid payment request");
+  }
 
   const payment = await Payment_Model.findById(paymentId as string);
-  if (!payment) return res.status(404).send("Payment not found");
+
+  if (!payment) {
+    return res.status(404).send("Payment not found");
+  }
+
+  // Change this to your frontend dashboard URL
+ const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";
 
   res.send(`
-    <h2>❌ Payment Failed</h2>
-    <p>Your payment was not completed.</p>
-    <p>Reference ID: ${paymentId}</p>
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Payment Failed</title>
+
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+
+          body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f7fb;
+          }
+
+          .card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+          }
+
+          .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+          }
+
+          h2 {
+            color: #dc2626;
+            margin-bottom: 12px;
+          }
+
+          p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+          }
+
+          .reference {
+            font-weight: bold;
+            color: #111827;
+            margin: 20px 0;
+            word-break: break-all;
+          }
+
+          .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+          }
+
+          .btn:hover {
+            background: #1d4ed8;
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="card">
+          <div class="icon">❌</div>
+
+          <h2>Payment Failed</h2>
+
+          <p>Unfortunately, your payment could not be completed.</p>
+          <p>Please try again or contact support if the problem persists.</p>
+
+          <p class="reference">
+            Reference ID:<br />
+            ${paymentId}
+          </p>
+
+          <a href="${dashboardUrl}" class="btn">
+            Back to Dashboard
+          </a>
+        </div>
+      </body>
+    </html>
   `);
 };
+
 
 const getPaymentIdForRefund = async (req: Request, res: Response) => {
   try {
