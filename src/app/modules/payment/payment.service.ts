@@ -220,6 +220,7 @@ const handleBoGCallbackService = async (payload: any) => {
     return {
       success: true,
       message: "Payment completed successfully",
+      paymentId: payment._id
     };
   } else if (payment.appointmentType === "SOLO_NURSE") {
     const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
