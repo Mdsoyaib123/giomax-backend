@@ -30,7 +30,7 @@ const soloNurseAppoinmentSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "rejected", "cancelled"],
+      enum: ["pending", "confirmed", "completed", "rejected", "cancelled","failed"],
       default: "pending",
     },
     prefarenceDate: {

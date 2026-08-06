@@ -1109,6 +1109,8 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
 
     // res.json({ redirectUrl: bogOrder._links.redirect.href });
+   
+   
     return sendBoGPaymentResponse(res, bogOrder);
 
   } catch (error: any) {
@@ -1578,9 +1580,24 @@ const paymentSuccess = async (req: Request, res: Response) => {
 
   const payment = await Payment_Model.findById(paymentId as string);
 
-  if (!payment) {
+    if (!payment) {
     return res.status(404).send("Payment not found");
   }
+
+  if( payment?.appointmentType === "SOLO_NURSE"){
+  const updateAppointmentToConfirmed = await soloNurseAppoinment_Model.findOneAndUpdate(
+    { _id: payment.appointmentId }, // Filter
+    {
+      $set: {
+        status: "confirmed",
+      },
+    },
+    {
+      new: true, // Return the updated document
+    }
+  )
+  }
+
 
   // Change this to your frontend dashboard URL
   const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";
@@ -1711,6 +1728,21 @@ const paymentFail = async (req: Request, res: Response) => {
   if (!payment) {
     return res.status(404).send("Payment not found");
   }
+
+    if( payment?.appointmentType === "SOLO_NURSE"){
+  const updateAppointmentToConfirmed = await soloNurseAppoinment_Model.findOneAndUpdate(
+    { _id: payment.appointmentId }, // Filter
+    {
+      $set: {
+        status: "failed",
+      },
+    },
+    {
+      new: true, // Return the updated document
+    }
+  )
+  }
+
 
   // Change this to your frontend dashboard URL
   const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";

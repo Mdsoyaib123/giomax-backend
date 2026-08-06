@@ -7,7 +7,7 @@ export type TSoloNurseAppoinment = {
   visitingType: "fristVisit" | "followUp";
   followUpDetails?: string;
   reasonForVisit?: string;
-  status: "pending" | "confirmed" | "completed" | "rejected";
+  status: "pending" | "confirmed" | "completed" | "rejected" | "failed";
   prefarenceDate: Date[];
   prefarenceTime: string;
   subService: string;
