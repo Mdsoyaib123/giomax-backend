@@ -25,7 +25,6 @@ const startClinicPayment = async (req: Request, res: Response) => {
       dataVisibility,
       method,
       token,
-
     } = req.body;
 
     const visibleChecked = dataVisibility === "ხილული" ? "☑" : "☐";
@@ -62,8 +61,6 @@ const startClinicPayment = async (req: Request, res: Response) => {
     );
     payment.bogOrderId = bogOrder.id;
     await payment.save();
-
-
 
     //     await sendEmailWithSES({
     //       to: patientEmail,
@@ -647,9 +644,8 @@ const startClinicPayment = async (req: Request, res: Response) => {
 // Start payment for solo nurse appointment
 const startSoloNursePayment = async (req: Request, res: Response) => {
   try {
-    const appointment = await soloNurseAppoinment_Model.findById(
-      req.body.appointmentId,
-    )
+    const appointment = await soloNurseAppoinment_Model
+      .findById(req.body.appointmentId)
       .populate({
         path: "patientId",
         populate: {
@@ -669,7 +665,6 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
 
     // const patientEmail = (appointment?.patientId as any)?.userId?.email;
     // const soloNurseEmail = (appointment?.soloNurseId as any)?.userId?.email;
-
 
     if (!appointment)
       return res.status(404).json({ message: "Appointment not found" });
@@ -691,428 +686,420 @@ const startSoloNursePayment = async (req: Request, res: Response) => {
     payment.bogOrderId = bogOrder.id;
     await payment.save();
 
+    //   const roundMoney = (value: number) =>
+    //     Math.round((value + Number.EPSILON) * 100) / 100;
 
-  //   const roundMoney = (value: number) =>
-  //     Math.round((value + Number.EPSILON) * 100) / 100;
+    //   const commissionAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.15);
+    //   const nurseAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.85);
 
-  //   const commissionAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.15);
-  //   const nurseAmount = roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.85);
+    //   // giorgi's email
+    //   const accountingEmail = "accounting@medconnect.com.ge";
 
-  //   // giorgi's email 
-  //   const accountingEmail = "accounting@medconnect.com.ge";
+    //   const nurseReceiptHtml = `
+    // <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
 
-  //   const nurseReceiptHtml = `
-  // <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
+    //   <h1 style="color: #0f766e; margin-bottom: 5px;">
+    //     MedConnect
+    //   </h1>
 
-  //   <h1 style="color: #0f766e; margin-bottom: 5px;">
-  //     MedConnect
-  //   </h1>
+    //   <p style="margin: 3px 0;">
+    //     <strong>კომპანიის დასახელება:</strong>
+    //     შპს მედქონექთ ჯგუფი 2025
+    //   </p>
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>კომპანიის დასახელება:</strong>
-  //     შპს მედქონექთ ჯგუფი 2025
-  //   </p>
+    //   <p style="margin: 3px 0;">
+    //     <strong>საიდენტიფიკაციო კოდი:</strong>
+    //     430049501
+    //   </p>
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>საიდენტიფიკაციო კოდი:</strong>
-  //     430049501
-  //   </p>
+    //   <p style="margin: 3px 0;">
+    //     <strong>მისამართი:</strong>
+    //     საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+    //   </p>
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>მისამართი:</strong>
-  //     საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <hr style="margin: 25px 0;" />
+    //   <h2 style="margin-bottom: 15px;">
+    //     საკომისიო ინვოისი
+    //   </h2>
 
-  //   <h2 style="margin-bottom: 15px;">
-  //     საკომისიო ინვოისი
-  //   </h2>
+    //   <p>
+    //     <strong>ინვოისის ნომერი:</strong>
+    //     COMM-${payment._id}
+    //   </p>
 
-  //   <p>
-  //     <strong>ინვოისის ნომერი:</strong>
-  //     COMM-${payment._id}
-  //   </p>
+    //   <p>
+    //     <strong>გაცემის თარიღი:</strong>
+    //     ${new Date().toLocaleDateString()}
+    //   </p>
 
-  //   <p>
-  //     <strong>გაცემის თარიღი:</strong>
-  //     ${new Date().toLocaleDateString()}
-  //   </p>
+    //   <p>
+    //     <strong>შეკვეთის ID:</strong>
+    //     ${payment._id}
+    //   </p>
 
-  //   <p>
-  //     <strong>შეკვეთის ID:</strong>
-  //     ${payment._id}
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <hr style="margin: 25px 0;" />
+    //   <h3>მიმღები</h3>
 
-  //   <h3>მიმღები</h3>
+    //   <p>
+    //     <strong>სახელი და გვარი:</strong>
+    //     ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
+    //   </p>
 
-  //   <p>
-  //     <strong>სახელი და გვარი:</strong>
-  //     ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
-  //   </p>
+    //   <p>
+    //     <strong>სტატუსი:</strong>
+    //     ინდმეწარმე / მცირე მეწარმე
+    //   </p>
 
-  //   <p>
-  //     <strong>სტატუსი:</strong>
-  //     ინდმეწარმე / მცირე მეწარმე
-  //   </p>
+    //   <p>
+    //     <strong>საიდენტიფიკაციო ნომერი:</strong>
+    //     ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
+    //   </p>
 
-  //   <p>
-  //     <strong>საიდენტიფიკაციო ნომერი:</strong>
-  //     ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <hr style="margin: 25px 0;" />
+    //   <h3>მომსახურების აღწერა</h3>
 
-  //   <h3>მომსახურების აღწერა</h3>
+    //   <p>
+    //     MedConnect პლატფორმის საკომისიო მომსახურება
+    //   </p>
 
-  //   <p>
-  //     MedConnect პლატფორმის საკომისიო მომსახურება
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <hr style="margin: 25px 0;" />
+    //   <h3>ფინანსური ინფორმაცია</h3>
 
-  //   <h3>ფინანსური ინფორმაცია</h3>
+    //   <p>
+    //     <strong>მომსახურების სრული ღირებულება:</strong>
+    //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
+    //   </p>
 
-  //   <p>
-  //     <strong>მომსახურების სრული ღირებულება:</strong>
-  //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
-  //   </p>
+    //   <p>
+    //     <strong>საკომისიო (15%):</strong>
+    //     ${commissionAmount} ₾
+    //   </p>
+    //   <p>
+    //     <strong>მათ შორის დღგ (18%):</strong>
+    //     ${roundMoney(commissionAmount * 0.18)} ₾
+    //   </p>
 
-  //   <p>
-  //     <strong>საკომისიო (15%):</strong>
-  //     ${commissionAmount} ₾
-  //   </p>
-  //   <p>
-  //     <strong>მათ შორის დღგ (18%):</strong>
-  //     ${roundMoney(commissionAmount * 0.18)} ₾
-  //   </p>
+    //   <p style="font-size: 18px;">
+    //     <strong>სულ:</strong>
+    //     ${commissionAmount} ₾
+    //   </p>
 
-    
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="font-size: 18px;">
-  //     <strong>სულ:</strong>
-  //     ${commissionAmount} ₾
-  //   </p>
+    //   <h3>ექთანზე ჩასარიცხი თანხა</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p style="font-size: 18px;">
+    //     <strong>${nurseAmount} ₾</strong>
+    //   </p>
 
-  //   <h3>ექთანზე ჩასარიცხი თანხა</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="font-size: 18px;">
-  //     <strong>${nurseAmount} ₾</strong>
-  //   </p>
+    //   <h3>გადახდის თარიღი</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     ${new Date().toLocaleDateString()}
+    //   </p>
 
-  //   <h3>გადახდის თარიღი</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     ${new Date().toLocaleDateString()}
-  //   </p>
+    //   <h3>შენიშვნა</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p style="line-height: 1.7;">
+    //     აღნიშნული ინვოისი ასახავს MedConnect-ის საკომისიოს მოცემულ შეკვეთაზე.
+    //   </p>
 
-  //   <h3>შენიშვნა</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="line-height: 1.7;">
-  //     აღნიშნული ინვოისი ასახავს MedConnect-ის საკომისიოს მოცემულ შეკვეთაზე.
-  //   </p>
+    //   <h3>საკონტაქტო</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     main@medconnect.com.ge
+    //   </p>
 
-  //   <h3>საკონტაქტო</h3>
+    // </div>
+    // `;
+    //   const patientReceit1 = `
+    // <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
 
-  //   <p>
-  //     main@medconnect.com.ge
-  //   </p>
+    //   <h1 style="color: #0f766e; margin-bottom: 5px;">
+    //     MedConnect
+    //   </h1>
 
-  // </div>
-  // `;
-  //   const patientReceit1 = `
-  // <div style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 25px; border: 1px solid #e5e7eb; border-radius: 10px; color: #111827;">
+    //   <p style="margin: 3px 0;">
+    //     <strong>კომპანიის დასახელება:</strong>
+    //     შპს მედქონექთ ჯგუფი 2025
+    //   </p>
 
-  //   <h1 style="color: #0f766e; margin-bottom: 5px;">
-  //     MedConnect
-  //   </h1>
+    //   <p style="margin: 3px 0;">
+    //     <strong>საიდენტიფიკაციო კოდი:</strong>
+    //     430049501
+    //   </p>
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>კომპანიის დასახელება:</strong>
-  //     შპს მედქონექთ ჯგუფი 2025
-  //   </p>
+    //   <p style="margin: 3px 0;">
+    //     <strong>მისამართი:</strong>
+    //     საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+    //   </p>
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>საიდენტიფიკაციო კოდი:</strong>
-  //     430049501
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="margin: 3px 0;">
-  //     <strong>მისამართი:</strong>
-  //     საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
-  //   </p>
+    //   <h2 style="margin-bottom: 15px;">
+    //     მომსახურების ქვითარი
+    //   </h2>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     <strong>დოკუმენტის ნომერი:</strong>
+    //     NUR-${payment._id}
+    //   </p>
 
-  //   <h2 style="margin-bottom: 15px;">
-  //     მომსახურების ქვითარი
-  //   </h2>
+    //   <p>
+    //     <strong>გაცემის თარიღი:</strong>
+    //     ${new Date().toLocaleDateString()}
+    //   </p>
 
-  //   <p>
-  //     <strong>დოკუმენტის ნომერი:</strong>
-  //     NUR-${payment._id}
-  //   </p>
+    //   <p>
+    //     <strong>შეკვეთის ID:</strong>
+    //     ${payment._id}
+    //   </p>
 
-  //   <p>
-  //     <strong>გაცემის თარიღი:</strong>
-  //     ${new Date().toLocaleDateString()}
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     <strong>შეკვეთის ID:</strong>
-  //     ${payment._id}
-  //   </p>
+    //   <h3>მომსახურების გამწევი</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     <strong>სახელი და გვარი:</strong>
+    //     ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
+    //   </p>
 
-  //   <h3>მომსახურების გამწევი</h3>
+    //   <p>
+    //     <strong>სტატუსი:</strong>
+    //     ინდმეწარმე / მცირე მეწარმე
+    //   </p>
 
-  //   <p>
-  //     <strong>სახელი და გვარი:</strong>
-  //     ${(appointment.soloNurseId as any)?.userId?.fullName || "N/A"}
-  //   </p>
+    //   <p>
+    //     <strong>საიდენტიფიკაციო ნომერი:</strong>
+    //     ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
+    //   </p>
 
-  //   <p>
-  //     <strong>სტატუსი:</strong>
-  //     ინდმეწარმე / მცირე მეწარმე
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     <strong>საიდენტიფიკაციო ნომერი:</strong>
-  //     ${(appointment.soloNurseId as any)?.nationalIdNumber || "N/A"}
-  //   </p>
+    //   <h3>პაციენტი</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     <strong>სახელი და გვარი:</strong>
+    //     ${(appointment.patientId as any)?.userId?.fullName || "N/A"}
+    //   </p>
 
-  //   <h3>პაციენტი</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     <strong>სახელი და გვარი:</strong>
-  //     ${(appointment.patientId as any)?.userId?.fullName || "N/A"}
-  //   </p>
+    //   <h3>მომსახურების დეტალები</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     <strong>მომსახურება:</strong>
+    //     ${appointment.subService}
+    //   </p>
 
-  //   <h3>მომსახურების დეტალები</h3>
+    //   <p>
+    //     <strong>თარიღი:</strong>
+    //     ${appointment.prefarenceDate?.[0]
+    //       ? new Date(appointment.prefarenceDate[0] as any).toLocaleDateString()
+    //       : "N/A"
+    //     }
+    //     ${appointment.prefarenceTime || ""}
+    //   </p>
 
-  //   <p>
-  //     <strong>მომსახურება:</strong>
-  //     ${appointment.subService}
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     <strong>თარიღი:</strong>
-  //     ${appointment.prefarenceDate?.[0]
-  //       ? new Date(appointment.prefarenceDate[0] as any).toLocaleDateString()
-  //       : "N/A"
-  //     }
-  //     ${appointment.prefarenceTime || ""}
-  //   </p>
+    //   <h3>ფინანსური ინფორმაცია</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     <strong>მომსახურების ღირებულება:</strong>
+    //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
+    //   </p>
 
-  //   <h3>ფინანსური ინფორმაცია</h3>
+    //   <p>
+    //     <strong>რაოდენობა:</strong>
+    //     1
+    //   </p>
 
-  //   <p>
-  //     <strong>მომსახურების ღირებულება:</strong>
-  //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
-  //   </p>
+    //   <p style="font-size: 18px;">
+    //     <strong>ჯამი:</strong>
+    //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
+    //   </p>
 
-  //   <p>
-  //     <strong>რაოდენობა:</strong>
-  //     1
-  //   </p>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="font-size: 18px;">
-  //     <strong>ჯამი:</strong>
-  //     ${roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05)} ₾
-  //   </p>
+    //   <h3>გადახდის მეთოდი</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     ბარათით გადახდა
+    //   </p>
 
-  //   <h3>გადახდის მეთოდი</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p>
-  //     ბარათით გადახდა
-  //   </p>
+    //   <h3>შენიშვნა</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p style="line-height: 1.7;">
+    //     აღნიშნული ქვითარი გაცემულია ექთნის მიერ გაწეული მომსახურებისთვის.
+    //     MedConnect წარმოადგენს აგენტ პლატფორმას, რომელიც უზრუნველყოფს დაჯავშნას და
+    //     გადახდას.
+    //   </p>
 
-  //   <h3>შენიშვნა</h3>
+    //   <hr style="margin: 25px 0;" />
 
-  //   <p style="line-height: 1.7;">
-  //     აღნიშნული ქვითარი გაცემულია ექთნის მიერ გაწეული მომსახურებისთვის.
-  //     MedConnect წარმოადგენს აგენტ პლატფორმას, რომელიც უზრუნველყოფს დაჯავშნას და
-  //     გადახდას.
-  //   </p>
+    //   <h3>საკონტაქტო</h3>
 
-  //   <hr style="margin: 25px 0;" />
+    //   <p>
+    //     თუ გაქვთ შეკითხვა ამ ქვითართან დაკავშირებით, დაგვიკავშირდით:
+    //   </p>
 
-  //   <h3>საკონტაქტო</h3>
+    //   <p>
+    //     main@medconnect.com.ge
+    //   </p>
 
-  //   <p>
-  //     თუ გაქვთ შეკითხვა ამ ქვითართან დაკავშირებით, დაგვიკავშირდით:
-  //   </p>
+    // </div>
+    // `;
+    //   const patientReceit2 = `
+    //   <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
 
-  //   <p>
-  //     main@medconnect.com.ge
-  //   </p>
+    //     <h1 style="color: #0f766e; margin-bottom: 5px;">MedConnect</h1>
 
-  // </div>
-  // `;
-  //   const patientReceit2 = `
-  //   <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-      
-  //     <h1 style="color: #0f766e; margin-bottom: 5px;">MedConnect</h1>
+    //     <p style="margin: 2px 0;">
+    //       <strong>კომპანიის დასახელება:</strong> შპს მედქონექთ ჯგუფი 2025
+    //     </p>
 
-  //     <p style="margin: 2px 0;">
-  //       <strong>კომპანიის დასახელება:</strong> შპს მედქონექთ ჯგუფი 2025
-  //     </p>
+    //     <p style="margin: 2px 0;">
+    //       <strong>საიდენტიფიკაციო კოდი:</strong> 430049501
+    //     </p>
 
-  //     <p style="margin: 2px 0;">
-  //       <strong>საიდენტიფიკაციო კოდი:</strong> 430049501
-  //     </p>
+    //     <p style="margin: 2px 0;">
+    //       <strong>მისამართი:</strong> საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
+    //     </p>
 
-  //     <p style="margin: 2px 0;">
-  //       <strong>მისამართი:</strong> საქართველო, ზესტაფონის რაიონი, ს. შუა კვალითი, მე–19 I შეს., N 4
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h2 style="margin-bottom: 10px;">ქვითარი</h2>
 
-  //     <h2 style="margin-bottom: 10px;">ქვითარი</h2>
+    //     <p>
+    //       <strong>დოკუმენტის ნომერი:</strong> MC-${payment._id}
+    //     </p>
 
-  //     <p>
-  //       <strong>დოკუმენტის ნომერი:</strong> MC-${payment._id}
-  //     </p>
+    //     <p>
+    //       <strong>გაცემის თარიღი:</strong> ${new Date().toLocaleDateString()}
+    //     </p>
 
-  //     <p>
-  //       <strong>გაცემის თარიღი:</strong> ${new Date().toLocaleDateString()}
-  //     </p>
+    //     <p>
+    //       <strong>შეკვეთის ID:</strong> ${payment._id}
+    //     </p>
 
-  //     <p>
-  //       <strong>შეკვეთის ID:</strong> ${payment._id}
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>მომხმარებელი</h3>
 
-  //     <h3>მომხმარებელი</h3>
+    //     <p>
+    //       <strong>სახელი და გვარი:</strong> ${(appointment.patientId as any)?.userId?.fullName || "N/A"
+    //     }
+    //     </p>
 
-  //     <p>
-  //       <strong>სახელი და გვარი:</strong> ${(appointment.patientId as any)?.userId?.fullName || "N/A"
-  //     }
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>მომსახურების აღწერა</h3>
 
-  //     <h3>მომსახურების აღწერა</h3>
+    //     <p>
+    //       MedConnect პლატფორმის სერვისის საფასური
+    //     </p>
 
-  //     <p>
-  //       MedConnect პლატფორმის სერვისის საფასური
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>ფინანსური ინფორმაცია</h3>
 
-  //     <h3>ფინანსური ინფორმაცია</h3>
+    //     <p>
+    //       <strong>სერვისის საფასური:</strong>
+    //       ${roundMoney(appointment.appointmentFee * 0.05)} ₾
+    //     </p>
 
-  //     <p>
-  //       <strong>სერვისის საფასური:</strong>
-  //       ${roundMoney(appointment.appointmentFee * 0.05)} ₾
-  //     </p>
+    //     <p>
+    //       <strong>მათ შორის დღგ (18%):</strong>
+    //       ${roundMoney(((appointment.appointmentFee * 0.05) * .18))} ₾
+    //     </p>
 
-  //     <p>
-  //       <strong>მათ შორის დღგ (18%):</strong>
-  //       ${roundMoney(((appointment.appointmentFee * 0.05) * .18))} ₾
-  //     </p>
+    //     <p style="font-size: 18px;">
+    //       <strong>ჯამი:</strong>
+    //       ${roundMoney(appointment.appointmentFee * 0.05)} ₾
+    //     </p>
 
-  //     <p style="font-size: 18px;">
-  //       <strong>ჯამი:</strong>
-  //       ${roundMoney(appointment.appointmentFee * 0.05)} ₾
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>გადახდის მეთოდი</h3>
 
-  //     <h3>გადახდის მეთოდი</h3>
+    //     <p>ბარათით გადახდა</p>
 
-  //     <p>ბარათით გადახდა</p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>შენიშვნა</h3>
 
-  //     <h3>შენიშვნა</h3>
+    //     <p>
+    //       აღნიშნული თანხა წარმოადგენს MedConnect პლატფორმის გამოყენების საფასურს.
+    //     </p>
 
-  //     <p>
-  //       აღნიშნული თანხა წარმოადგენს MedConnect პლატფორმის გამოყენების საფასურს.
-  //     </p>
+    //     <hr style="margin: 20px 0;" />
 
-  //     <hr style="margin: 20px 0;" />
+    //     <h3>საკონტაქტო</h3>
 
-  //     <h3>საკონტაქტო</h3>
+    //     <p>
+    //       main@medconnect.com.ge
+    //     </p>
 
-  //     <p>
-  //       main@medconnect.com.ge
-  //     </p>
+    //   </div>
+    // `;
 
-  //   </div>
-  // `;
+    //   if (bogOrder) {
+    //     //send to patients
+    //     await sendEmail({
+    //       to: patientEmail,
+    //       subject: "MedConnect Nurse Service Receipt",
+    //       html: patientReceit1,
+    //     });
+    //     await sendEmail({
+    //       to: patientEmail,
+    //       subject: "MedConnect Payment Receipt",
+    //       html: patientReceit2,
+    //     });
 
-  //   if (bogOrder) {
-  //     //send to patients 
-  //     await sendEmail({
-  //       to: patientEmail,
-  //       subject: "MedConnect Nurse Service Receipt",
-  //       html: patientReceit1,
-  //     });
-  //     await sendEmail({
-  //       to: patientEmail,
-  //       subject: "MedConnect Payment Receipt",
-  //       html: patientReceit2,
-  //     });
+    //     // send to nurse
+    //     await sendEmail({
+    //       to: soloNurseEmail,
+    //       subject: "MedConnect Commission Invoice",
+    //       html: nurseReceiptHtml,
+    //     });
 
-  //     // send to nurse
-  //     await sendEmail({
-  //       to: soloNurseEmail,
-  //       subject: "MedConnect Commission Invoice",
-  //       html: nurseReceiptHtml,
-  //     });
+    //     // send to giorgi accounting
+    //     await sendEmail({
+    //       to: accountingEmail,
+    //       subject: `MedConnect Nurse Service Receipt`,
+    //       html: patientReceit1,
+    //     });
 
+    //     await sendEmail({
+    //       to: accountingEmail,
+    //       subject: `MedConnect Payment Receipt`,
+    //       html: patientReceit2,
+    //     });
 
+    //     await sendEmail({
+    //       to: accountingEmail,
+    //       subject: `Nurse Service Receipt `,
+    //       html: nurseReceiptHtml,
+    //     });
 
-  //     // send to giorgi accounting
-  //     await sendEmail({
-  //       to: accountingEmail,
-  //       subject: `MedConnect Nurse Service Receipt`,
-  //       html: patientReceit1,
-  //     });
-
-  //     await sendEmail({
-  //       to: accountingEmail,
-  //       subject: `MedConnect Payment Receipt`,
-  //       html: patientReceit2,
-  //     });
-
-  //     await sendEmail({
-  //       to: accountingEmail,
-  //       subject: `Nurse Service Receipt `,
-  //       html: nurseReceiptHtml,
-  //     });
-
-  //   }
-
+    //   }
 
     // res.json({ redirectUrl: bogOrder._links.redirect.href });
-   
-   
-    return sendBoGPaymentResponse(res, bogOrder);
 
+    return sendBoGPaymentResponse(res, bogOrder);
   } catch (error: any) {
     console.error("Error creating BoG order:", error.message);
     res.status(500).json({ success: false, message: error.message });
@@ -1124,22 +1111,62 @@ const bogCallbackController = async (req: Request, res: Response) => {
   try {
     const result = await PaymentService.handleBoGCallbackService(req.body);
 
+    if (!result.success) {
+      console.log("Payment failed. Skipping receipt emails.");
+      return res.sendStatus(200);
+    }
+
     const payment = await Payment_Model.findById(result.paymentId);
     let appointment;
     if (payment?.appointmentType === "SOLO_NURSE") {
-      appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+      appointment = await soloNurseAppoinment_Model
+        .findById(payment.appointmentId)
+        .populate({
+          path: "patientId",
+          populate: {
+            path: "userId",
+            model: "user",
+            select: "email fullName",
+          },
+        })
+        .populate({
+          path: "soloNurseId",
+          populate: {
+            path: "userId",
+            model: "user",
+            select: "email fullName",
+          },
+        });
+
+      if (!appointment) {
+        console.error("Appointment not found.");
+        return res.sendStatus(200);
+      }
     }
 
     const patientEmail = (appointment?.patientId as any)?.userId?.email;
     const soloNurseEmail = (appointment?.soloNurseId as any)?.userId?.email;
 
+    console.log("Patient Email:", patientEmail);
+    console.log("Nurse Email:", soloNurseEmail);
+
     const roundMoney = (value: number) =>
       Math.round((value + Number.EPSILON) * 100) / 100;
 
-    const commissionAmount = appointment?.appointmentFee ? roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.15) : 0;
-    const nurseAmount = appointment?.appointmentFee ? roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05) * 0.85) : 0;
+    const commissionAmount = appointment?.appointmentFee
+      ? roundMoney(
+          (appointment.appointmentFee - appointment.appointmentFee * 0.05) *
+            0.15,
+        )
+      : 0;
+    const nurseAmount = appointment?.appointmentFee
+      ? roundMoney(
+          (appointment.appointmentFee - appointment.appointmentFee * 0.05) *
+            0.85,
+        )
+      : 0;
 
-    // giorgi's email 
+    // giorgi's email
     const accountingEmail = "accounting@medconnect.com.ge";
 
     const nurseReceiptHtml = `
@@ -1218,7 +1245,7 @@ const bogCallbackController = async (req: Request, res: Response) => {
 
     <p>
       <strong>მომსახურების სრული ღირებულება:</strong>
-      ${appointment?.appointmentFee ? roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05)) : 0} ₾
+      ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05) : 0} ₾
     </p>
 
     <p>
@@ -1353,9 +1380,10 @@ const bogCallbackController = async (req: Request, res: Response) => {
 
     <p>
       <strong>თარიღი:</strong>
-      ${appointment?.prefarenceDate?.[0]
-        ? new Date(appointment.prefarenceDate[0] as any).toLocaleDateString()
-        : "N/A"
+      ${
+        appointment?.prefarenceDate?.[0]
+          ? new Date(appointment.prefarenceDate[0] as any).toLocaleDateString()
+          : "N/A"
       }
       ${appointment?.prefarenceTime || ""}
     </p>
@@ -1366,7 +1394,7 @@ const bogCallbackController = async (req: Request, res: Response) => {
 
     <p>
       <strong>მომსახურების ღირებულება:</strong>
-      ${appointment?.appointmentFee ? roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05)) : 0} ₾
+      ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05) : 0} ₾
     </p>
 
     <p>
@@ -1376,7 +1404,7 @@ const bogCallbackController = async (req: Request, res: Response) => {
 
     <p style="font-size: 18px;">
       <strong>ჯამი:</strong>
-      ${appointment?.appointmentFee ? roundMoney((appointment.appointmentFee - appointment.appointmentFee * 0.05)) : 0} ₾
+      ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee - appointment.appointmentFee * 0.05) : 0} ₾
     </p>
 
     <hr style="margin: 25px 0;" />
@@ -1449,8 +1477,9 @@ const bogCallbackController = async (req: Request, res: Response) => {
       <h3>მომხმარებელი</h3>
 
       <p>
-        <strong>სახელი და გვარი:</strong> ${(appointment?.patientId as any)?.userId?.fullName || "N/A"
-      }
+        <strong>სახელი და გვარი:</strong> ${
+          (appointment?.patientId as any)?.userId?.fullName || "N/A"
+        }
       </p>
 
       <hr style="margin: 20px 0;" />
@@ -1467,17 +1496,17 @@ const bogCallbackController = async (req: Request, res: Response) => {
 
       <p>
         <strong>სერვისის საფასური:</strong>
-        ${appointment?.appointmentFee ? roundMoney((appointment.appointmentFee * 0.05)) : 0} ₾
+        ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee * 0.05) : 0} ₾
       </p>
 
       <p>
         <strong>მათ შორის დღგ (18%):</strong>
-        ${appointment?.appointmentFee ? roundMoney(((appointment.appointmentFee * 0.05) * .18)) : 0} ₾
+        ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee * 0.05 * 0.18) : 0} ₾
       </p>
 
       <p style="font-size: 18px;">
         <strong>ჯამი:</strong>
-        ${appointment?.appointmentFee ? roundMoney((appointment.appointmentFee * 0.05)) : 0} ₾
+        ${appointment?.appointmentFee ? roundMoney(appointment.appointmentFee * 0.05) : 0} ₾
       </p>
 
       <hr style="margin: 20px 0;" />
@@ -1505,49 +1534,70 @@ const bogCallbackController = async (req: Request, res: Response) => {
     </div>
   `;
 
+    const sendEmailSafely = async (
+      to: string | undefined,
+      subject: string,
+      html: string,
+      label: string,
+    ) => {
+      if (!to) {
+        console.warn(`${label}: Email address is missing.`);
+        return;
+      }
 
-      //send to patients 
-      await sendEmail({
-        to: patientEmail,
-        subject: "MedConnect Nurse Service Receipt",
-        html: patientReceit1,
-      });
-      await sendEmail({
-        to: patientEmail,
-        subject: "MedConnect Payment Receipt",
-        html: patientReceit2,
-      });
+      try {
+        await sendEmail({
+          to,
+          subject,
+          html,
+        });
 
-      // send to nurse
-      await sendEmail({
-        to: soloNurseEmail,
-        subject: "MedConnect Commission Invoice",
-        html: nurseReceiptHtml,
-      });
+        console.log(`✅ ${label} sent to ${to}`);
+      } catch (error) {
+        console.error(`❌ Failed to send ${label} to ${to}`, error);
+      }
+    };
 
+    await Promise.allSettled([
+      sendEmailSafely(
+        patientEmail,
+        "MedConnect Nurse Service Receipt",
+        patientReceit1,
+        "Patient Nurse Receipt",
+      ),
+      sendEmailSafely(
+        patientEmail,
+        "MedConnect Payment Receipt",
+        patientReceit2,
+        "Patient Payment Receipt",
+      ),
+      sendEmailSafely(
+        soloNurseEmail,
+        "MedConnect Commission Invoice",
+        nurseReceiptHtml,
+        "Nurse Commission Invoice",
+      ),
+      sendEmailSafely(
+        accountingEmail,
+        "MedConnect Nurse Service Receipt",
+        patientReceit1,
+        "Accounting Nurse Receipt",
+      ),
+      sendEmailSafely(
+        accountingEmail,
+        "MedConnect Payment Receipt",
+        patientReceit2,
+        "Accounting Payment Receipt",
+      ),
+      sendEmailSafely(
+        accountingEmail,
+        "MedConnect Commission Invoice",
+        nurseReceiptHtml,
+        "Accounting Commission Invoice",
+      ),
+    ]);
 
-
-      // send to giorgi accounting
-      await sendEmail({
-        to: accountingEmail,
-        subject: `MedConnect Nurse Service Receipt`,
-        html: patientReceit1,
-      });
-
-      await sendEmail({
-        to: accountingEmail,
-        subject: `MedConnect Payment Receipt`,
-        html: patientReceit2,
-      });
-
-      await sendEmail({
-        to: accountingEmail,
-        subject: `Nurse Service Receipt `,
-        html: nurseReceiptHtml,
-      });
-
-    
-
+    console.log("All email tasks completed.");
 
     res.json({ success: true, message: "Callback processed" });
   } catch (error: any) {
@@ -1580,27 +1630,13 @@ const paymentSuccess = async (req: Request, res: Response) => {
 
   const payment = await Payment_Model.findById(paymentId as string);
 
-    if (!payment) {
+  if (!payment) {
     return res.status(404).send("Payment not found");
   }
 
-  if( payment?.appointmentType === "SOLO_NURSE"){
-  const updateAppointmentToConfirmed = await soloNurseAppoinment_Model.findOneAndUpdate(
-    { _id: payment.appointmentId }, // Filter
-    {
-      $set: {
-        status: "confirmed",
-      },
-    },
-    {
-      new: true, // Return the updated document
-    }
-  )
-  }
-
-
   // Change this to your frontend dashboard URL
-  const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";
+  const dashboardUrl =
+    "https://famous-brigadeiros-c58211.netlify.app/dashboard";
 
   res.send(`
     <!DOCTYPE html>
@@ -1700,7 +1736,6 @@ const paymentSuccess = async (req: Request, res: Response) => {
   `);
 };
 
-
 // Payment failed page
 // const paymentFail = async (req: Request, res: Response) => {
 //   const { paymentId } = req.query;
@@ -1729,23 +1764,9 @@ const paymentFail = async (req: Request, res: Response) => {
     return res.status(404).send("Payment not found");
   }
 
-    if( payment?.appointmentType === "SOLO_NURSE"){
-  const updateAppointmentToConfirmed = await soloNurseAppoinment_Model.findOneAndUpdate(
-    { _id: payment.appointmentId }, // Filter
-    {
-      $set: {
-        status: "failed",
-      },
-    },
-    {
-      new: true, // Return the updated document
-    }
-  )
-  }
-
-
   // Change this to your frontend dashboard URL
-  const dashboardUrl = "https://famous-brigadeiros-c58211.netlify.app/dashboard";
+  const dashboardUrl =
+    "https://famous-brigadeiros-c58211.netlify.app/dashboard";
 
   res.send(`
     <!DOCTYPE html>
@@ -1844,7 +1865,6 @@ const paymentFail = async (req: Request, res: Response) => {
     </html>
   `);
 };
-
 
 const getPaymentIdForRefund = async (req: Request, res: Response) => {
   try {

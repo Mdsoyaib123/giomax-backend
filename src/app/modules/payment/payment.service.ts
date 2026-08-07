@@ -47,7 +47,7 @@ type PaymentMethod = "card" | "google_pay" | "apple_pay";
 const createBoGOrder = async (
   payment: any,
   method: PaymentMethod = "card",
-  payToken?: string
+  payToken?: string,
 ) => {
   try {
     if (!payment?._id) throw new Error("Payment ID is missing");
@@ -78,7 +78,6 @@ const createBoGOrder = async (
         fail: `${process.env.BACKEND_URL}/api/v1/payment/fail?paymentId=${payment._id}`,
       },
     };
-
 
     if (method === "card") {
       body.redirect_urls = {
@@ -121,24 +120,23 @@ const createBoGOrder = async (
           "Content-Type": "application/json",
           "Accept-Language": "en",
         },
-      }
+      },
     );
 
     console.log("BoG order created successfully:", res.data);
 
     return res.data;
   } catch (error: any) {
-
     if (payment.appointmentType === "SOLO_NURSE") {
-      const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+      const appointment = await soloNurseAppoinment_Model.findById(
+        payment.appointmentId,
+      );
       if (!appointment) {
         throw new Error("Appointment not found");
       }
       appointment.isPaymentDone = "FAILED";
       await appointment.save();
-
     }
-
 
     if (axios.isAxiosError(error)) {
       console.error("BoG order create failed:", {
@@ -149,8 +147,8 @@ const createBoGOrder = async (
 
       throw new Error(
         error.response?.data?.message ||
-        error.response?.data?.error_description ||
-        "Failed to create Bank of Georgia payment order"
+          error.response?.data?.error_description ||
+          "Failed to create Bank of Georgia payment order",
       );
     }
 
@@ -183,10 +181,9 @@ const handleBoGCallbackService = async (payload: any) => {
     return {
       success: true,
       message: "Already processed",
+      paymentId: payment._id,
     };
   }
-
-
 
   if (status === "completed" || status === "approved") {
     payment.status = "PAID";
@@ -202,28 +199,45 @@ const handleBoGCallbackService = async (payload: any) => {
       {
         upsert: true,
         new: true,
-      }
+      },
     );
 
     await payment.save();
 
+    if (payment?.appointmentType === "SOLO_NURSE") {
+        await soloNurseAppoinment_Model.findOneAndUpdate(
+          { _id: payment.appointmentId }, // Filter
+          {
+            $set: {
+              status: "confirmed",
+            },
+          },
+          {
+            new: true, // Return the updated document
+          },
+        );
+    }
+
     if (payment.appointmentType === "SOLO_NURSE") {
-      const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+      const appointment = await soloNurseAppoinment_Model.findById(
+        payment.appointmentId,
+      );
       if (!appointment) {
         throw new Error("Appointment not found");
       }
       appointment.isPaymentDone = "PAID";
       await appointment.save();
-
     }
 
     return {
       success: true,
       message: "Payment completed successfully",
-      paymentId: payment._id
+      paymentId: payment._id,
     };
   } else if (payment.appointmentType === "SOLO_NURSE") {
-    const appointment = await soloNurseAppoinment_Model.findById(payment.appointmentId);
+    const appointment = await soloNurseAppoinment_Model.findById(
+      payment.appointmentId,
+    );
 
     if (!appointment) {
       throw new Error("Appointment not found");
@@ -232,9 +246,6 @@ const handleBoGCallbackService = async (payload: any) => {
     appointment.isPaymentDone = "FAILED";
     await appointment.save();
   }
-
-
-
 
   // ❌ FAILED PAYMENT
   payment.status = "FAILED";
