@@ -251,7 +251,26 @@ const createSoloNurse = async (payload: any) => {
     );
 
     const createdNurse = await SoloNurse_Model.create(
-      [{ ...nursePayload, availability: [], userId: newUser[0]._id }],
+      [
+        {
+          ...nursePayload,
+          availability: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ].map((day) => ({
+            day,
+            startTime: "09:00 AM",
+            endTime: "05:00 PM",
+            isEnabled: true,
+          })),
+          userId: newUser[0]._id,
+        },
+      ],
       { session },
     );
 
@@ -271,8 +290,10 @@ const createSoloNurse = async (payload: any) => {
 
     return createdNurse[0];
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    await session.endSession();
     throw error;
   }
 };
