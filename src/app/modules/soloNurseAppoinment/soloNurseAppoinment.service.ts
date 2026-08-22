@@ -421,6 +421,7 @@ export const soloNurseAppointmentService = {
   getSingleNurseAppointment: async (soloNurseId: string) => {
     return await soloNurseAppoinment_Model
       .find({ soloNurseId: soloNurseId })
+      .sort({ prefarenceDate: 1 })
       .populate({
         path: "patientId",
         select: "_id userId gender age",
