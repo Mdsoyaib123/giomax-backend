@@ -25,6 +25,7 @@ export const patientService = {
   ) => {
     const {
       fullName,
+      surname,
       phoneNumber,
       dateOfBirth,
       gender,
@@ -72,6 +73,10 @@ export const patientService = {
 
       if (fullName !== undefined) {
         updateData.fullName = fullName;
+      }
+
+      if (surname !== undefined) {
+        updateData.surname = surname;
       }
 
       if (profileImageUrl) {

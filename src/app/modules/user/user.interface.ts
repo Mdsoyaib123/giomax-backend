@@ -1,5 +1,6 @@
 export type TUser = {
   fullName: string;
+  surname?: string;
   profileImage?: string;
   email: string;
   password: string;
