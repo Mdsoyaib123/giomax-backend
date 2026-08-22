@@ -93,7 +93,7 @@ export const createPatient = async (
     }
 
     // Extract
-    const { fullName, email, password, comfirmPassword, ...patientPayload } =
+    const { fullName,surname, email, password, comfirmPassword, ...patientPayload } =
       payload;
 
     // 2. Check password === confirm password
@@ -114,6 +114,7 @@ export const createPatient = async (
     // 4. Prepare user data
     const newUserData = {
       fullName,
+      surname,
       email,
       password: hashedPassword,
       comfirmPassword: hashedPassword,
