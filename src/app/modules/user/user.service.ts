@@ -264,8 +264,8 @@ const createSoloNurse = async (payload: any) => {
             "Sunday",
           ].map((day) => ({
             day,
-            startTime: "09:00 AM",
-            endTime: "05:00 PM",
+            startTime: "12:00 AM",
+            endTime: "11:59 PM",
             isEnabled: true,
           })),
           userId: newUser[0]._id,
