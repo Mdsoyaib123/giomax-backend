@@ -12,6 +12,16 @@ const mainServiceSchema = new Schema(
       ],
       required: true,
     },
+    georgiaName: {
+      type: String,
+      enum: [
+        "ზოგადი საექთნო მოვლა",
+        "ფიზიოთერაპია",
+        "ორსულთა მოვლა",  
+      "ფსიქიკური ჯანმრთელობა",
+      ],
+      required: true,
+    },   
   },
   { timestamps: true }
 );
