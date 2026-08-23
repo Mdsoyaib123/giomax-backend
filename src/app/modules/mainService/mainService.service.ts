@@ -6,7 +6,7 @@ const createMainService = async ( payload : any) => {
   
 };
 const getAllMainServices = async () => {
-  return await MainService_Model.find().select("_id name");
+  return await MainService_Model.find().select("_id name georgiaName");
 };
 
 export const MainServiceService = {
